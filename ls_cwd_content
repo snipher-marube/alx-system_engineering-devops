@@ -1,14 +1,14 @@
 total 20
 drwxr-xr-x 8 root root  235 Feb 13 06:40 .
-drwx------ 1 root root 4096 Feb 13 06:40 ..
+drwx------ 1 root root 4096 Feb 13 06:45 ..
 drwxr-xr-x 2 root root 4096 Feb  9 01:36 0x00-shell_basics
 drwxr-xr-x 2 root root 4096 Feb  9 01:28 0x01-shell_permissions
-drwxr-xr-x 2 root root  181 Feb 13 06:40 0x02-shell_redirections
+drwxr-xr-x 2 root root  181 Feb 13 06:45 0x02-shell_redirections
 -rw-r--r-- 1 root root   12 Feb 13 06:37 *\"Best School"\\*$?*****:)
-drwxr-xr-x 8 root root  166 Feb 13 06:16 .git
+drwxr-xr-x 8 root root  166 Feb 13 06:40 .git
 -rwxr-x-wx 1 root root    0 Feb  9 00:07 hello
 lrwxrwxrwx 1 root root    7 Feb 13 05:02 __ls__ -> /bin/ls
--rw-r--r-- 1 root root    0 Feb 13 06:40 ls_cwd_content
+-rw-r--r-- 1 root root    0 Feb 13 06:45 ls_cwd_content
 drwxr-x--x 2 root root    6 Feb  9 00:43 my_dir
 -rwxr-xr-x 1 root root  689 Feb  9 01:41 school.mgc
 drwxr-xr-x 3 root root   16 Feb  8 01:37 welcome
