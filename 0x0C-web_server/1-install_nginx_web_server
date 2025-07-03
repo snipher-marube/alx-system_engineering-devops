@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Update package lists and install Nginx with -y flag
+apt-get update -y
+apt-get install nginx -y
+
+# Create custom index.html with Hello World!
+echo "Hello World!" > /var/www/html/index.html
+
+# Configure Nginx to listen on port 80 (default configuration)
+cat > /etc/nginx/sites-available/default <<EOF
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    root /var/www/html;
+    index index.html index.htm;
+
+    server_name _;
+
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+}
+EOF
+
+# Restart Nginx without using systemctl
+service nginx restart
+
+# Enable Nginx to start on boot
+update-rc.d nginx defaults
+
+# Verify Nginx is running
+if ! pgrep nginx >/dev/null; then
+    echo "Error: Nginx failed to start!"
+    exit 1
+fi
+
+echo "Nginx installed and configured successfully."
+echo "You can test it with: curl localhost"
