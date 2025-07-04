@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Configures Nginx to add custom X-Served-By header with server hostname
+# Configures Nginx to add X-Served-By header with server hostname in HTTP responses
 
 # Install Nginx if not already installed
 apt-get update -y
@@ -9,14 +9,20 @@ apt-get install nginx -y
 HOSTNAME=$(hostname)
 
 # Configure custom header in Nginx
-CONFIG_FILE="/etc/nginx/nginx.conf"
-HEADER_CONFIG="add_header X-Served-By $HOSTNAME;"
+CONFIG_FILE="/etc/nginx/sites-available/default"
+HEADER_LINE="add_header X-Served-By $HOSTNAME;"
 
-# Insert the header configuration in the http block
-sed -i "/http {/a \ \ \ \ $HEADER_CONFIG" $CONFIG_FILE
+# Check if header already exists to avoid duplicates
+if ! grep -q "X-Served-By" "$CONFIG_FILE"; then
+    # Insert the header configuration in the server block
+    sed -i "/server_name _;/a \ \ \ \ $HEADER_LINE" "$CONFIG_FILE"
+fi
 
 # Test configuration and restart Nginx
-nginx -t && service nginx restart
-
-echo "Nginx configured with X-Served-By header: $HOSTNAME"
-echo "Test with: curl -sI localhost | grep X-Served-By"
+if nginx -t; then
+    service nginx restart
+    echo "Nginx successfully configured with X-Served-By: $HOSTNAME"
+else
+    echo "Nginx configuration test failed"
+    exit 1
+fi
