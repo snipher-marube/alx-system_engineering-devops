@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Configures Nginx to add custom X-Served-By header with server hostname
 
 # Install Nginx if not already installed
