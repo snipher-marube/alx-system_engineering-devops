@@ -1,0 +1,97 @@
+#!/bin/bash
+# 2-setup_datadog
+
+# Create a security monitoring dashboard with API
+DASHBOARD_RESPONSE=$(curl -X POST "https://api.datadoghq.com/api/v1/dashboard" \
+-H "Content-Type: application/json" \
+-H "DD-API-KEY: ${DD_API_KEY}" \
+-H "DD-APPLICATION-KEY: ${DD_APP_KEY}" \
+-d @- << EOF
+{
+  "title": "Security Monitoring Dashboard",
+  "description": "Dashboard for monitoring security metrics and anomalies",
+  "widgets": [
+    {
+      "id": 1,
+      "definition": {
+        "title": "Request Volume by IP (Top 10)",
+        "type": "toplist",
+        "requests": [
+          {
+            "q": "top(avg:ip_tracking.request.count{*} by {ip_address}, 10, 'mean', 'desc')",
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 100,
+                "palette": "red_on_white"
+              }
+            ]
+          }
+        ]
+      },
+      "layout": {"x": 0, "y": 0, "width": 8, "height": 6}
+    },
+    {
+      "id": 2,
+      "definition": {
+        "title": "Suspicious IP Activities",
+        "type": "timeseries",
+        "requests": [
+          {
+            "q": "sum:ip_tracking.suspicious_ip.count{reason:high_volume}",
+            "display_type": "bars",
+            "name": "High Volume"
+          },
+          {
+            "q": "sum:ip_tracking.suspicious_ip.count{reason:sensitive_paths}",
+            "display_type": "bars",
+            "name": "Sensitive Paths"
+          }
+        ],
+        "yaxis": {"scale": "linear", "min": "auto"}
+      },
+      "layout": {"x": 8, "y": 0, "width": 8, "height": 6}
+    },
+    {
+      "id": 3,
+      "definition": {
+        "title": "Blocked IPs Over Time",
+        "type": "query_value",
+        "requests": [
+          {
+            "q": "sum:ip_tracking.blocked_ip.count{*}",
+            "aggregator": "sum"
+          }
+        ],
+        "autoscale": true,
+        "precision": 0
+      },
+      "layout": {"x": 16, "y": 0, "width": 4, "height": 4}
+    },
+    {
+      "id": 4,
+      "definition": {
+        "title": "Request Distribution",
+        "type": "distribution",
+        "requests": [
+          {
+            "q": "avg:ip_tracking.request.count{*} by {path}",
+            "style": {"palette": "cool"}
+          }
+        ],
+        "show_legend": true
+      },
+      "layout": {"x": 0, "y": 6, "width": 12, "height": 6}
+    }
+  ],
+  "layout_type": "free",
+  "is_read_only": false,
+  "notify_list": [],
+  "template_variables": []
+}
+EOF
+)
+
+# Extract dashboard ID
+DASHBOARD_ID=$(echo "$DASHBOARD_RESPONSE" | jq -r '.id')
+echo "$DASHBOARD_ID" > 2-setup_datadog
