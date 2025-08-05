@@ -1,42 +1,44 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Configures a new ubuntu machine by installing
+# Nginx where it should be listening on port 80
+# Serve a page that would return a Hello World string
+#
+# colors
+blue='\e[1;34m'
+brown='\e[0;33m'
+green='\e[1;32m'
+reset='\033[0m'
 
-# Install Nginx if not already installed
-apt-get update -y
-apt-get install nginx -y
+echo -e "${blue}Updating and installing ${brown}Nginx${blue}.${reset}\n"
+sudo apt-get update -y -qq && \
+	 sudo apt-get install nginx -y
 
-# Create custom 404 page
-mkdir -p /var/www/html/error_pages
-echo "Ceci n'est pas une page" > /var/www/html/error_pages/404.html
+echo -e "\n${blue}Setting up some minor stuff.${reset}\n"
 
-# Configure Nginx to use custom 404 page
-cat > /etc/nginx/sites-available/default <<EOF
-server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
+# starting nginx service
+sudo service nginx start
 
-    root /var/www/html;
-    index index.html index.htm;
+# allowing nginx on firewall
+sudo ufw allow 'Nginx HTTP'
 
-    server_name _;
+# Give the user ownership to website files for easy editing
+sudo chown -R "$USER":"$USER" /var/www/html
+sudo chmod -R 755 /var/www
 
-    location / {
-        try_files \$uri \$uri/ =404;
-    }
+# Backup default index
+cp /var/www/html/index.nginx-debian.html /var/www/html/index.nginx-debian.html.bckp
 
-    error_page 404 /error_pages/404.html;
-    location = /error_pages/404.html {
-        internal;
-    }
-}
-EOF
+# Creating new index
+echo -e "Hello World!" > /var/www/html/index.nginx-debian.html
 
-# Test Nginx configuration
-nginx -t
+# Setting up /redirect_me to a youtube video
+sudo sed -i '24i\	rewrite ^/redirect_me https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;' /etc/nginx/sites-available/default
 
-# Restart Nginx without using systemctl
-service nginx restart
+# Set up a 404 page
+echo "Ceci n'est pas une page" >> /var/www/html/error_404.html
+sudo sed -i '25i\	error_page 404 /error_404.html;' /etc/nginx/sites-available/default
 
-# Verify the configuration
-echo "Configuration complete. Test with:"
-echo "curl localhost/nonexistent-page"
-echo "Should return: Ceci n'est pas une page"
+# Restarting nginx
+sudo service nginx restart
+
+echo -e "\n${green}Completed.${reset} ✅\n"

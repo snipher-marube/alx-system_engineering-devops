@@ -1,24 +1,8 @@
-#!/usr/bin/env bash
-# Configures ufw firewall to allow only SSH, HTTP, and HTTPS traffic
-
-# Reset ufw to default settings and enable it
-ufw --force reset
-ufw --force enable
-
-# Deny all incoming traffic by default
-ufw default deny incoming
-
-# Allow SSH connections
-ufw allow 22/tcp
-
-# Allow HTTP traffic
-ufw allow 80/tcp
-
-# Allow HTTPS traffic
-ufw allow 443/tcp
-
-# Reload ufw to apply changes
-ufw reload
-
-# Display firewall status
-ufw status verbose
+sudo apt-get install ufw -y
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow 22/tcp
+sudo ufw allow 443/tcp
+sudo ufw allow 80/tcp
+sudo ufw enable -y
+sudo ufw status

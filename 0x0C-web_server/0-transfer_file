@@ -1,36 +1,18 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Transfers a file from our client to a server
+#
+# variables
+path="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+filename=$(basename "$BASH_SOURCE")
+brown='\e[0;33m'
+reset='\033[0m'
+file="$1"
+ip="$2"
+user="$3"
+key="$4"
 
-# Check if all 4 parameters are provided
-if [ $# -ne 4 ]; then
-    echo "Usage: $0 PATH_TO_FILE IP USERNAME PATH_TO_SSH_KEY"
-    exit 1
-fi
-
-# Assign parameters to variables
-PATH_TO_FILE=$1
-IP=$2
-USERNAME=$3
-PATH_TO_SSH_KEY=$4
-
-# Check if the file exists
-if [ ! -f "$PATH_TO_FILE" ]; then
-    echo "Error: File $PATH_TO_FILE does not exist."
-    exit 1
-fi
-
-# Check if the SSH key exists
-if [ ! -f "$PATH_TO_SSH_KEY" ]; then
-    echo "Error: SSH key $PATH_TO_SSH_KEY does not exist."
-    exit 1
-fi
-
-# Transfer the file using scp with strict host key checking disabled
-scp -i "$PATH_TO_SSH_KEY" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$PATH_TO_FILE" "$USERNAME@$IP:~/"
-
-# Check if scp command was successful
-if [ $? -eq 0 ]; then
-    echo "File transferred successfully."
+if [ $# -eq 4 ]; then
+	scp -i "$key" -o StrictHostKeyChecking=no "$path"/"$file" "$user"@"$ip":/home/"$user"/
 else
-    echo "Error: File transfer failed."
-    exit 1
+	echo -e "Usage: ${brown}$filename PATH_TO_FILE IP USERNAME PATH_TO_SSH_KEY${reset}"
 fi

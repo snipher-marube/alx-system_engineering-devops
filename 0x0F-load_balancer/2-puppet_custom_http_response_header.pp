@@ -1,26 +1,30 @@
-# Puppet manifest to configure Nginx with X-Served-By header
-class nginx_custom_header {
-  # Install Nginx package if not present
-  package { 'nginx':
-    ensure => 'installed',
-  }
+# Setup New Ubuntu server with nginx
+# and add a custom HTTP header
 
-  # Configure Nginx with custom header
-  file { '/etc/nginx/conf.d/custom_header.conf':
-    ensure  => 'present',
-    content => "add_header X-Served-By \$hostname;",
-    notify  => Service['nginx'],
-    require => Package['nginx'],
-  }
-
-  # Ensure Nginx service is running
-  service { 'nginx':
-    ensure     => 'running',
-    enable     => true,
-    hasrestart => true,
-    require    => Package['nginx'],
-  }
+exec { 'update system':
+        command => '/usr/bin/apt-get update',
 }
 
-# Apply the configuration
-include nginx_custom_header
+package { 'nginx':
+	ensure => 'installed',
+	require => Exec['update system']
+}
+
+file {'/var/www/html/index.html':
+	content => 'Hello World!'
+}
+
+exec {'redirect_me':
+	command => 'sed -i "24i\	rewrite ^/redirect_me https://th3-gr00t.tk/ permanent;" /etc/nginx/sites-available/default',
+	provider => 'shell'
+}
+
+exec {'HTTP header':
+	command => 'sed -i "25i\	add_header X-Served-By \$hostname;" /etc/nginx/sites-available/default',
+	provider => 'shell'
+}
+
+service {'nginx':
+	ensure => running,
+	require => Package['nginx']
+}
